@@ -11,7 +11,7 @@ class LinearRegressionClassifier:
         self.df = df
 
     # Input column names as a list of strings
-    def classify(self, variables=False):
+    def fit(self, variables=False, perc_train=0.7, perc_test=0.3):
         # If the user inputted the variables to use, use those, if not, use all
         df = self.df
         if variables:
@@ -39,7 +39,7 @@ class LinearRegressionClassifier:
         vdf_sel.show(3)
         
         # Separamos el dataframe en set de entrenamiento y de prueba
-        splits = vdf_sel.randomSplit([0.7, 0.3])
+        splits = vdf_sel.randomSplit([perc_train, perc_test])
         train_df = splits[0]
         test_df = splits[1]
 

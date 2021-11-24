@@ -70,4 +70,4 @@ if __name__ == "__main__":
     classifier = LinearRegressionClassifier(df)
     # Select the columns to use for the classification, if no input in classify(), then all of them will be used
     sel_col = ['DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'ArrDelay']
-    classifier.classify(sel_col)
+    classifier.fit(sel_col, perc_train=0.7, perc_test=0.3)
