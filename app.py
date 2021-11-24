@@ -6,6 +6,7 @@ from pyspark_dist_explore import hist
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import config
  
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession
@@ -18,7 +19,7 @@ from classifiers.linear_regression import LinearRegressionClassifier
  
 if __name__ == "__main__":
 
-    path = "/Users/espina/Unsynced/Datasets/dataverse_files/2007.csv.bz2"
+    path = config.dataset_path
 
     # Create Spark context with Spark configuration
     spark = SparkSession.builder.appName("SimpleApp").getOrCreate()
