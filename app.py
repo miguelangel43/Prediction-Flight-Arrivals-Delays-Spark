@@ -31,7 +31,6 @@ if __name__ == "__main__":
     df = spark.read.csv(path, header=True)
     # Get only a sample of the rows for faster computation
     df = df.limit(1000)
-    print(df.describe().toPandas().transpose())
     #print(data.count())
     #print(df.schema.names)
 
@@ -39,8 +38,8 @@ if __name__ == "__main__":
     forbidden_vars = ('ArrTime', 'ActualElapsedTime', 'AirTime', 'TaxiIn', 'Diverted', 'CarrierDelay',
      'WeatherDelay', 'NASDelay', 'SecurityDelay', 'LateAircraftDelay')
     df = df.drop(*forbidden_vars)
-    print('Original dataframe schema')
-    df.printSchema()
+    # print('Original dataframe schema')
+    # df.printSchema()
 
      # # Cast columns datatypes to adequate one
     # # Cast to int these numerical columns
@@ -67,8 +66,9 @@ if __name__ == "__main__":
     # indexers = [StringIndexer(inputCol=column, outputCol=column+"_index").fit(df) for column in cat_columns]
     # pipeline = Pipeline(stages=indexers)
     # df_r = pipeline.fit(df).transform(df)
-    print('Updated dataframe schema')
-    df.printSchema()
+
+    # print('Updated dataframe schema')
+    # df.printSchema()
 
     # Classification
     classifier = LinearRegressionClassifier()

@@ -5,8 +5,12 @@ def train_test_split(df, sel_col=None, perc_train=0.8, perc_test=0.2):
     variables = ['DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'ArrDelay']
     if sel_col:
         variables = sel_col
-    print(df.describe().toPandas().transpose())
     df = df.select(variables)
+
+    # Drop null values
+    df = df.na.drop("any")
+    print(df.count())
+
     # Print some statistics about the variables
     print(df.describe().toPandas().transpose())
     vectorAssembler = VectorAssembler(inputCols = variables, outputCol = 'features')
