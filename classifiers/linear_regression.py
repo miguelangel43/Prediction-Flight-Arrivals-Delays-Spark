@@ -1,7 +1,5 @@
 from pyspark.ml.regression import LinearRegression
 from pyspark.ml.evaluation import RegressionEvaluator
-from pandas.plotting import scatter_matrix
-import six
 from pyspark.sql import functions as F
 
 class LinearRegressionClassifier:
@@ -9,7 +7,6 @@ class LinearRegressionClassifier:
     def __init__(self):
         self.model = None
 
-    # Input column names as a list of strings
     def fit(self, train_df):
         lr = LinearRegression(featuresCol = 'features', labelCol='ArrDelay', maxIter=10, regParam=0.3, elasticNetParam=0.8)
         lr_model = lr.fit(train_df)
@@ -29,7 +26,7 @@ class LinearRegressionClassifier:
         self.model = lr_model
         
     def predict(self, test_df):
-        # Realizamos predicciones sobre el set de prueba y sacamos su R cuadrado
+        # Predict the test_df and print stats
         lr_predictions = self.model.transform(test_df)
         lr_predictions.select("prediction","ArrDelay","features")
         lr_evaluator = RegressionEvaluator(predictionCol="prediction", \
