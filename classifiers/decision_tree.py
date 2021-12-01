@@ -1,8 +1,7 @@
 from pyspark.ml.regression import DecisionTreeRegressor
 from pyspark.ml.evaluation import RegressionEvaluator
-from pyspark.sql import functions as F
 
-class DecisionTreeClassifier:
+class DecisionTreeClass:
 
     def __init__(self):
         self.model = None

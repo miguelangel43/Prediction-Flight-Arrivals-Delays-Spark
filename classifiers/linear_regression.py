@@ -1,8 +1,7 @@
 from pyspark.ml.regression import LinearRegression
 from pyspark.ml.evaluation import RegressionEvaluator
-from pyspark.sql import functions as F
 
-class LinearRegressionClassifier:
+class LinearRegressionClass:
 
     def __init__(self):
         self.model = None

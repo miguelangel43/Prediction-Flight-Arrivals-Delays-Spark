@@ -14,8 +14,9 @@ from pyspark.sql.functions import col
 from pyspark.ml import Pipeline
 from pyspark.ml.feature import StringIndexer
 
-from classifiers.linear_regression import LinearRegressionClassifier
-from classifiers.decision_tree import DecisionTreeClassifier
+from classifiers.linear_regression import LinearRegressionClass
+from classifiers.decision_tree import DecisionTreeClass
+from classifiers.random_forest import RandomForestClass
 import preprocessing
 
  
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     # df.printSchema()
 
     # Classification
-    classifier = DecisionTreeClassifier()
+    classifier = RandomForestClass()
     sel_col = ['DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'ArrDelay']
     train_df, test_df = preprocessing.train_test_split(df, sel_col=sel_col)
     classifier.fit(train_df)
