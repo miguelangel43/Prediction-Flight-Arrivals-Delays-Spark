@@ -15,6 +15,7 @@ from pyspark.ml import Pipeline
 from pyspark.ml.feature import StringIndexer
 
 from classifiers.linear_regression import LinearRegressionClassifier
+import preprocessing
 
  
 if __name__ == "__main__":
@@ -32,10 +33,9 @@ if __name__ == "__main__":
     df = df.limit(1000)
     print(df.describe().toPandas().transpose())
     #print(data.count())
-    # print(df.schema.names)
+    #print(df.schema.names)
 
     # Drop the forbidden columns
-    # 1. Several variables may not contain useful information or are forbidden. These need to be filtered out.
     forbidden_vars = ('ArrTime', 'ActualElapsedTime', 'AirTime', 'TaxiIn', 'Diverted', 'CarrierDelay',
      'WeatherDelay', 'NASDelay', 'SecurityDelay', 'LateAircraftDelay')
     df = df.drop(*forbidden_vars)
@@ -59,6 +59,9 @@ if __name__ == "__main__":
     df = df.withColumn("TaxiOut",col("TaxiOut").cast("int"))
     df = df.withColumn("Cancelled",col("Cancelled").cast("int"))
 
+    # Drop cancelled flights
+    df = df.where("Cancelled == 0")
+
     # Apply StringIndexer to the categorical columns
     # cat_columns = ["UniqueCarrier", "TailNum", "Origin", "Dest", "CancellationCode"]
     # indexers = [StringIndexer(inputCol=column, outputCol=column+"_index").fit(df) for column in cat_columns]
@@ -68,7 +71,8 @@ if __name__ == "__main__":
     df.printSchema()
 
     # Classification
-    classifier = LinearRegressionClassifier(df)
-    # Select the columns to use for the classification, if no input in classify(), then all of them will be used
+    classifier = LinearRegressionClassifier()
     sel_col = ['DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'ArrDelay']
-    classifier.fit(sel_col, perc_train=0.7, perc_test=0.3)
+    train_df, test_df = preprocessing.train_test_split(df, sel_col=sel_col)
+    classifier.fit(train_df)
+    classifier.predict(test_df)
