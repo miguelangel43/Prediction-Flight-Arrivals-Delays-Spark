@@ -19,6 +19,7 @@ from classifiers.decision_tree import DecisionTreeClass
 from classifiers.random_forest import RandomForestClass
 import preprocessing
 
+from pyspark.ml.stat import Correlation
  
 if __name__ == "__main__":
 
@@ -32,7 +33,7 @@ if __name__ == "__main__":
     # Read the dataset into a spark dataframe
     df = spark.read.csv(path, header=True)
     # Get only a sample of the rows for faster computation
-    df = df.limit(1000)
+    #df = df.limit(1000)
     #print(data.count())
     #print(df.schema.names)
 
@@ -58,23 +59,22 @@ if __name__ == "__main__":
     df = df.withColumn("DepDelay",col("DepDelay").cast("int"))
     df = df.withColumn("Distance",col("Distance").cast("int"))
     df = df.withColumn("TaxiOut",col("TaxiOut").cast("int"))
-    df = df.withColumn("Cancelled",col("Cancelled").cast("int"))
+    df = df.withColumn("Cancelled",col("Cancelled").cast("int")) # Irrelevant variable
 
     # Drop cancelled flights
     df = df.where("Cancelled == 0")
 
     # Apply StringIndexer to the categorical columns
-    # cat_columns = ["UniqueCarrier", "TailNum", "Origin", "Dest", "CancellationCode"]
-    # indexers = [StringIndexer(inputCol=column, outputCol=column+"_index").fit(df) for column in cat_columns]
-    # pipeline = Pipeline(stages=indexers)
-    # df_r = pipeline.fit(df).transform(df)
+    cat_columns = ["UniqueCarrier", "TailNum", "Origin", "Dest", "CancellationCode"]
+    preprocessing.encode_cat_vars(df, cat_columns)
 
     # print('Updated dataframe schema')
     # df.printSchema()
 
     # Classification
-    classifier = RandomForestClass()
-    sel_col = ['DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'ArrDelay']
+    classifier = LinearRegressionClass()
+    sel_col = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut',
+        'DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'ArrDelay']
     train_df, test_df = preprocessing.train_test_split(df, sel_col=sel_col)
     classifier.fit(train_df)
     classifier.predict(test_df)
