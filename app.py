@@ -77,7 +77,7 @@ if __name__ == "__main__":
     df.printSchema()
     
     # Variable selection and train/test split 
-    sel_col = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut',
+    sel_col = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut', 'TailNum_vector', 'Origin_vector', 'Dest_vector',
         'DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'label']
     train_df, test_df = preprocessing.train_test_split(df, sel_col=sel_col)
 
