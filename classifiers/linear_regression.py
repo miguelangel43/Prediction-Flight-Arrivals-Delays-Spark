@@ -7,7 +7,7 @@ class LinearRegressionClass:
         self.model = None
 
     def fit(self, train_df):
-        lr = LinearRegression(featuresCol = 'features', labelCol='ArrDelay', maxIter=10, regParam=0.3, elasticNetParam=0.8)
+        lr = LinearRegression(featuresCol = 'features', labelCol='label', maxIter=10, regParam=0.3, elasticNetParam=0.8)
         lr_model = lr.fit(train_df)
         trainingSummary = lr_model.summary
 
@@ -27,9 +27,9 @@ class LinearRegressionClass:
     def predict(self, test_df):
         # Predict the test_df and print stats
         lr_predictions = self.model.transform(test_df)
-        lr_predictions.select("prediction","ArrDelay","features")
+        lr_predictions.select("prediction","label","features")
         lr_evaluator = RegressionEvaluator(predictionCol="prediction", \
-                        labelCol="ArrDelay",metricName="r2")
+                        labelCol="label",metricName="r2")
 
         print("R Squared (R2) on test data = %g" % lr_evaluator.evaluate(lr_predictions))
         test_result = self.model.evaluate(test_df)
