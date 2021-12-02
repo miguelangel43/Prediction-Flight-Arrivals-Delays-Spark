@@ -28,11 +28,14 @@ def encode_cat_vars(df, cat_column):
     :param df
     :param str cat_column name of the column to be encoded
 
-    :return updated_df
+    :return encoded dataframe with 
     """
     indexer = StringIndexer(inputCol=cat_column, outputCol=cat_column+'_index')
     indexed = indexer.fit(df).transform(df)
+
     encoder = OneHotEncoder(inputCol=cat_column+'_index',
                         outputCol=cat_column+'_vector')
-    encoded = encoder.transform(indexed)
-    encoded.show()
+    model = encoder.fit(indexed)
+    encoded = model.transform(indexed)
+    encoded = encoded.drop(*(cat_column, cat_column+'_index'))
+    return encoded

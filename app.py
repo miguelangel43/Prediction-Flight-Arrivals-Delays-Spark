@@ -69,12 +69,12 @@ if __name__ == "__main__":
     df = df.where("Cancelled == 0")
 
     # Apply StringIndexer to the categorical columns
-    # cat_columns = ["UniqueCarrier", "TailNum", "Origin", "Dest", "CancellationCode"]
-    # for column in cat_columns:
-    #     preprocessing.encode_cat_vars(df, column)
-
+    cat_columns = ["TailNum", "Origin", "Dest"] # "UniqueCarrier", ""CancellationCode""
+    for column in cat_columns:
+        df = preprocessing.encode_cat_vars(df, column)
+    
     # print('Updated dataframe schema')
-    # df.printSchema()
+    df.printSchema()
     
     # Variable selection and train/test split 
     sel_col = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut',
@@ -86,6 +86,6 @@ if __name__ == "__main__":
     tuning.run()
 
     # Classification
-    # classifier = LinearRegressionClass()
-    # classifier.fit(train_df)
-    # classifier.predict(test_df)
+    classifier = LinearRegressionClass()
+    classifier.fit(train_df)
+    classifier.predict(test_df)
