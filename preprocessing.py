@@ -17,8 +17,6 @@ def train_test_split(df, sel_col=None, perc_train=0.8, perc_test=0.2):
     if sel_col:
         variables = sel_col
     df = df.select(variables)
-    # Drop null values
-    df = df.na.drop("any")
     # Print some statistics about the variables
     #print(df.describe().toPandas().transpose())
     vectorAssembler = VectorAssembler(inputCols = variables, outputCol = 'features')

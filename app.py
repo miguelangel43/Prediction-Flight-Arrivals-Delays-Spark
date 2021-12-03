@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # Read the dataset into a spark dataframe
     df = spark.read.csv(path, header=True)
     # Get only a sample of the rows for faster computation
-    df = df.limit(1000)
+    #df = df.limit(1000)
     #print(data.count())
     #print(df.schema.names)
 
@@ -71,6 +71,8 @@ if __name__ == "__main__":
     df = df.drop('Cancelled')
     df = df.drop('CancellationCode')
     df = df.drop('UniqueCarrier')
+    # Drop null values
+    df = df.na.drop("any")
 
     # Apply StringIndexer to the categorical columns
     cat_columns = ["TailNum", "Origin", "Dest"] # "UniqueCarrier", "CancellationCode"
@@ -84,20 +86,20 @@ if __name__ == "__main__":
         'DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'label']
 
     # Print some statistics    
-    data_analysis.print_correlations(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
-    data_analysis.print_stats(df, all_cols)
+    #data_analysis.print_correlations(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
+    data_analysis.print_stats(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
 
     # Feature subset selection
-    preprocessing.select_variables(df)
+    # preprocessing.select_variables(df)
 
-    # Train/test split
-    train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
+    # # Train/test split
+    # train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
 
-    # Tuning
-    # tuning = Tunning(train_df)
-    # tuning.run()
+    # # Tuning
+    # # tuning = Tunning(train_df)
+    # # tuning.run()
 
-    # Classification
-    classifier = LinearRegressionClass()
-    classifier.fit(train_df)
-    classifier.predict(test_df)
+    # # Classification
+    # classifier = LinearRegressionClass()
+    # classifier.fit(train_df)
+    # classifier.predict(test_df)
