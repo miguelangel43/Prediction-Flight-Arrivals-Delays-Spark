@@ -47,14 +47,14 @@ def encode_cat_vars(df, cat_column):
     return encoded
 
 
-def select_variables(df):
+def select_variables(df, cols):
     """
     Applies univariate FS on a dataframe
 
     :params df vector with columns ("features", "label")
     :return df vector with columns ("features", "label", "selectedFeatures")
     """
-    vdf_sel = vectorize(df, df.columns)
+    vdf_sel = vectorize(df, cols)
     selector = UnivariateFeatureSelector(featuresCol="features", outputCol="selectedFeatures",
                                      labelCol="label", selectionMode="numTopFeatures")
     selector.setFeatureType("continuous").setLabelType("continuous").setSelectionThreshold(4)

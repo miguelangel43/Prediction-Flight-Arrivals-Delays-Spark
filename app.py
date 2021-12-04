@@ -12,6 +12,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 from pyspark.ml import Pipeline
 from pyspark.ml.feature import StringIndexer
+from pyspark.ml.functions import vector_to_array
 
 from classifiers.linear_regression import LinearRegressionClass
 from classifiers.decision_tree import DecisionTreeClass
@@ -38,8 +39,6 @@ if __name__ == "__main__":
     df = spark.read.csv(path, header=True)
     # Get only a sample of the rows for faster computation
     df = df.limit(1000)
-    #print(data.count())
-    #print(df.schema.names)
 
     # Drop columns, cast to adequate datatypes, drop null values and encode categorical variables
     df = preprocessing.prepare_data(df)
@@ -56,29 +55,27 @@ if __name__ == "__main__":
     data_analysis.print_stats(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
 
     # Feature subset selection
-    # preprocessing.select_variables(df)
+    # fss_data = preprocessing.select_variables(df, all_cols)
+    # view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
+    # view.show()
 
-    # # Train/test split
-    # train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
-
-    # Tuning
-    tuning = Tunning(train_df)
+    # # Tuning
+    tuning = Tunning(preprocessing.vectorize(df, all_cols))
     lr = tuning.run_lr()
     dt = tuning.run_dt()
     rf = tuning.run_rf()
 
+    # # Classification
+    # classifier = LinearRegressionClass()
 
-    # Classification
-    classifier = LinearRegressionClass()
-
-    if path_testing: # If another dataset was given to test the model on
-        classifier.fit(preprocessing.vectorize(df, all_cols)) 
-        df_testing = spark.read.csv(path_testing, header=True)
-        df_testing = df_testing.limit(100)
-        df_testing = preprocessing.prepare_data(df_testing)
-        classifier.predict(preprocessing.vectorize(df, all_cols))
-    else:
-        # Train/test split
-        train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
-        classifier.fit(train_df)
-        classifier.predict(test_df)
+    # if path_testing: # If another dataset was given to test the model on
+    #     classifier.fit(preprocessing.vectorize(df, all_cols)) 
+    #     df_testing = spark.read.csv(path_testing, header=True)
+    #     df_testing = df_testing.limit(100)
+    #     df_testing = preprocessing.prepare_data(df_testing)
+    #     classifier.predict(preprocessing.vectorize(df, all_cols))
+    # else:
+    #     # Train/test split
+    #     train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
+    #     classifier.fit(train_df)
+    #     classifier.predict(test_df)
