@@ -64,3 +64,35 @@ def select_variables(df):
     #     % selector.getSelectionThreshold())
     #result.show()
     return(result)
+
+def check_data(df):
+    countBool = True if df.count()==0 else False
+
+
+    expected_columns = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'DepTime', 'CRSDepTime',
+     'ArrTime', 'CRSArrTime', 'UniqueCarrier', 'FlightNum', 'TailNum', 'ActualElapsedTime',
+      'CRSElapsedTime', 'AirTime', 'ArrDelay', 'DepDelay', 'Origin', 'Dest', 'Distance', 'TaxiIn', 
+      'TaxiOut', 'Cancelled', 'CancellationCode', 'Diverted', 'CarrierDelay', 'WeatherDelay', 'NASDelay', 
+      'SecurityDelay', 'LateAircraftDelay']
+
+    received_columns = df.schema.names
+
+    missing_columns = []
+    for column in expected_columns:
+        if column not in received_columns:
+            missing_columns.append(column)
+
+    
+    columnsBool = True if len(missing_columns)>0 else False        
+    
+    if countBool:
+        print("The input Dataset does not have any rows")
+        exit(1)
+    if columnsBool:
+        print("The input dataset is missing the following columns",missing_columns)
+        exit(1)
+
+
+
+
+

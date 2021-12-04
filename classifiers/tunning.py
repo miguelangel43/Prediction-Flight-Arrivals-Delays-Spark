@@ -58,15 +58,6 @@ class Tunning:
 		print("Coefficients: %s" % str(bestModel.coefficients))
 		print("Intercept: %s" % str(bestModel.intercept))
 
-		print("Summarize the model over the training set and print out some metrics")
-		
-		trainingSummary = bestModel.summary
-		print("numIterations: %d" % trainingSummary.totalIterations)
-		print("objectiveHistory: %s" % str(trainingSummary.objectiveHistory))
-		trainingSummary.residuals.show()
-		print("RMSE: %f" % trainingSummary.rootMeanSquaredError)
-		print("r2: %f" % trainingSummary.r2)
-
 		return bestModel
 
 	def run_dt(self):
@@ -78,12 +69,15 @@ class Tunning:
 		#print("#########decision tree default parameters#########")
 		#print(dt.params)
 		#print("#########END decision tree parameters#########")
+		print("metric",RegressionEvaluator().getMetricName())
 
 
 		paramGrid = ParamGridBuilder() \
     	.addGrid(dt.minInstancesPerNode, [10,50,100,500]) \
     	.addGrid(dt.maxDepth,[5,10,15,20,25,30]) \
-    	.build() #max depth allowed 30
+    	.build() 
+
+    	
 
 		crossval = CrossValidator(estimator=dt,
                           estimatorParamMaps=paramGrid,
@@ -143,7 +137,7 @@ class Tunning:
 
 		print("Best Parameters for random forest")
 		print(bestModel._java_obj.extractParamMap())
-		
+
 		return bestModel
 		
 
