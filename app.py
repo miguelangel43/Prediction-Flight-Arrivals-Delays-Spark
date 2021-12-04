@@ -50,6 +50,7 @@ if __name__ == "__main__":
     all_cols = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut', 'Origin_vector', 'Dest_vector',
         'DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'label']
 
+
     # Print some statistics    
     #data_analysis.print_correlations(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
     data_analysis.print_stats(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
@@ -57,9 +58,15 @@ if __name__ == "__main__":
     # Feature subset selection
     # preprocessing.select_variables(df)
 
-    # # Tuning
-    # # tuning = Tunning(train_df)
-    # # tuning.run()
+    # # Train/test split
+    # train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
+
+    # Tuning
+    tuning = Tunning(train_df)
+    lr = tuning.run_lr()
+    dt = tuning.run_dt()
+    rf = tuning.run_rf()
+
 
     # Classification
     classifier = LinearRegressionClass()
