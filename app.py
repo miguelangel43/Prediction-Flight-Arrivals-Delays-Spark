@@ -57,21 +57,24 @@ if __name__ == "__main__":
     preprocessing.check_data(df)
 
     # Get only a sample of the rows for faster computation
-    df = df.limit(1000)
+    df = df.sample(0.00001)
 
     # Drop columns, cast to adequate datatypes, drop null values and encode categorical variables
+    print('Preparing the data...')
     df = preprocessing.prepare_data(df)
-   
-    print('Updated dataframe schema')
+    
+    print('Dataframe schema')
     df.printSchema()
     
-    all_cols = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut', 'Origin_vector', 'Dest_vector',
+    # All variables that will be considered for the prediction
+    all_cols = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut', 'Origin', 'Dest',
         'DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'label']
-
+    # Categorical variables
+    cat_cols = ["Origin", "Dest", "DayOfWeek", "Month"]
 
     # Print some statistics    
-    data_analysis.print_correlations(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
-    data_analysis.print_stats(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
+    data_analysis.print_correlations(df, [col for col in all_cols if col not in cat_cols])
+    data_analysis.print_stats(df, [col for col in all_cols if col not in cat_cols])
 
 
     # Feature subset selection
@@ -97,6 +100,7 @@ if __name__ == "__main__":
 
         df_testing = spark.read.csv(path_testing, header=True)
         df_testing = df_testing.limit(1000)
+
         df_testing = preprocessing.prepare_data(df_testing)
 
         vdf_testing = preprocessing.vectorize(df_testing, all_cols)
@@ -108,6 +112,7 @@ if __name__ == "__main__":
     else:
         # Train/test split
         train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
+
         # Tuning
         tuning = Tunning(train_df)
         lr = tuning.run_lr()
@@ -119,6 +124,3 @@ if __name__ == "__main__":
             classifier = factory_model(i)
             classifier.setModel(models_to_use[i])
             classifier.predict(test_df)
-        
-            
-
