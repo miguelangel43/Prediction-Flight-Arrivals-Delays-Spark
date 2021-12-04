@@ -30,15 +30,23 @@ if __name__ == "__main__":
     sc = spark.sparkContext
     sc.setLogLevel("OFF")
 
+    #Getting inputs from console, 1 is path of dataset, 2 (Optional) path to test dataset
     path = sys.argv[1]
     path_testing = False
     if len(sys.argv) == 3:
         path_testing = sys.argv[2]
 
     # Read the dataset into a spark dataframe
-    df = spark.read.csv(path, header=True)
-    df = df.sample(0.0001)
-    print(df.count())
+    try:
+        df = spark.read.csv(path, header=True)
+    except:
+        print("The specified path is not pointing a readable file")
+        exit(1)
+        
+    preprocessing.check_data(df)
+
+    # Get only a sample of the rows for faster computation
+    df = df.sample(0.00001)
 
     # Drop columns, cast to adequate datatypes, drop null values and encode categorical variables
     print('Preparing the data...')
@@ -57,10 +65,11 @@ if __name__ == "__main__":
     data_analysis.print_correlations(df, [col for col in all_cols if col not in cat_cols])
     data_analysis.print_stats(df, [col for col in all_cols if col not in cat_cols])
 
+
     # Feature subset selection
-    # fss_data = preprocessing.select_variables(df, all_cols)
-    # view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
-    # view.show()
+    fss_data = preprocessing.select_variables(df, all_cols)
+    view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
+    view.show()
 
     # Tuning
     tuning = Tunning(preprocessing.vectorize(df, all_cols))
