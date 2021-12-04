@@ -19,6 +19,7 @@ from classifiers.decision_tree import DecisionTreeClass
 from classifiers.random_forest import RandomForestClass
 from classifiers.tunning import Tunning
 import preprocessing
+import data_analysis
 
 from pyspark.ml.stat import Correlation
  
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     # Read the dataset into a spark dataframe
     df = spark.read.csv(path, header=True)
     # Get only a sample of the rows for faster computation
-    df = df.limit(1000)
+    #df = df.limit(1000)
     #print(data.count())
     #print(df.schema.names)
 
@@ -45,8 +46,8 @@ if __name__ == "__main__":
     # print('Original dataframe schema')
     # df.printSchema()
 
-     # # Cast columns datatypes to adequate one
-    # # Cast to int these numerical columns
+    # Cast columns datatypes to adequate one
+    # Cast to int these numerical columns
     df = df.withColumn("Year",col("Year").cast("int"))
     df = df.withColumn("Month",col("Month").cast("int"))
     df = df.withColumn("DayofMonth",col("DayofMonth").cast("int"))
@@ -67,27 +68,42 @@ if __name__ == "__main__":
 
     # Drop cancelled flights
     df = df.where("Cancelled == 0")
+    df = df.drop('Cancelled')
+    df = df.drop('CancellationCode')
+    df = df.drop('UniqueCarrier')
+    # Drop null values
+    df = df.na.drop("any")
 
     # Apply StringIndexer to the categorical columns
-    # cat_columns = ["UniqueCarrier", "TailNum", "Origin", "Dest", "CancellationCode"]
-    # for column in cat_columns:
-    #     preprocessing.encode_cat_vars(df, column)
-
-    # print('Updated dataframe schema')
-    # df.printSchema()
+    cat_columns = ["TailNum", "Origin", "Dest"] # "UniqueCarrier", "CancellationCode"
+    for column in cat_columns:
+        df = preprocessing.encode_cat_vars(df, column)
     
-    # Variable selection and train/test split 
-    sel_col = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut',
+    # print('Updated dataframe schema')
+    df.printSchema()
+    
+    all_cols = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut', 'TailNum_vector', 'Origin_vector', 'Dest_vector',
         'DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'label']
-    train_df, test_df = preprocessing.train_test_split(df, sel_col=sel_col)
+
+
+    # Print some statistics    
+    #data_analysis.print_correlations(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
+    data_analysis.print_stats(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
+
+    # Feature subset selection
+    # preprocessing.select_variables(df)
+
+    # # Train/test split
+    # train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
 
     # Tuning
-    #tuning = Tunning(train_df)
-    #tuning.run_lr()
-    #tuning.run_dt()
-    #tuning.run_rf()
+    # tuning = Tunning(train_df)
+    # tuning.run_lr()
+    # tuning.run_dt()
+    # tuning.run_rf()
 
-    # Classification
+
+    # # Classification
     # classifier = LinearRegressionClass()
     # classifier.fit(train_df)
     # classifier.predict(test_df)
