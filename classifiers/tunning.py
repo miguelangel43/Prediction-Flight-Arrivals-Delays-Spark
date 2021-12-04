@@ -67,6 +67,8 @@ class Tunning:
 		print("RMSE: %f" % trainingSummary.rootMeanSquaredError)
 		print("r2: %f" % trainingSummary.r2)
 
+		return bestModel
+
 	def run_dt(self):
 
 		#lr = LogisticRegression(maxIter=10)
@@ -105,6 +107,8 @@ class Tunning:
 		print("Best Parameters for decision tree")
 		print(bestModel._java_obj.extractParamMap())
 
+		return bestModel
+
 	def run_rf(self):
 		rf = RandomForestRegressor(featuresCol='features', labelCol='label')
 
@@ -139,6 +143,8 @@ class Tunning:
 
 		print("Best Parameters for random forest")
 		print(bestModel._java_obj.extractParamMap())
+		
+		return bestModel
 		
 
 

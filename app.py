@@ -97,10 +97,10 @@ if __name__ == "__main__":
     # train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
 
     # Tuning
-    # tuning = Tunning(train_df)
-    # tuning.run_lr()
-    # tuning.run_dt()
-    # tuning.run_rf()
+    tuning = Tunning(train_df)
+    lr = tuning.run_lr()
+    dt = tuning.run_dt()
+    rf = tuning.run_rf()
 
 
     # # Classification
