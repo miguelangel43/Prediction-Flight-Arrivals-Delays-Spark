@@ -37,45 +37,47 @@ if __name__ == "__main__":
 
     # Read the dataset into a spark dataframe
     df = spark.read.csv(path, header=True)
-    # Get only a sample of the rows for faster computation
-    df = df.limit(1000)
+    df = df.sample(0.0001)
+    print(df.count())
 
     # Drop columns, cast to adequate datatypes, drop null values and encode categorical variables
+    print('Preparing the data...')
     df = preprocessing.prepare_data(df)
     
-    # print('Updated dataframe schema')
+    print('Dataframe schema')
     df.printSchema()
     
-    all_cols = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut', 'Origin_vector', 'Dest_vector',
+    # All variables that will be considered for the prediction
+    all_cols = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut', 'Origin', 'Dest',
         'DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'label']
-
+    # Categorical variables
+    cat_cols = ["Origin", "Dest", "DayOfWeek", "Month"]
 
     # Print some statistics    
-    #data_analysis.print_correlations(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
-    data_analysis.print_stats(df, [col for col in all_cols if col not in ['TailNum_vector', 'Origin_vector', 'Dest_vector']])
+    data_analysis.print_correlations(df, [col for col in all_cols if col not in cat_cols])
+    data_analysis.print_stats(df, [col for col in all_cols if col not in cat_cols])
 
     # Feature subset selection
     # fss_data = preprocessing.select_variables(df, all_cols)
     # view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
     # view.show()
 
-    # # Tuning
+    # Tuning
     tuning = Tunning(preprocessing.vectorize(df, all_cols))
     lr = tuning.run_lr()
     dt = tuning.run_dt()
     rf = tuning.run_rf()
 
-    # # Classification
-    # classifier = LinearRegressionClass()
+    # Classification
+    classifier = LinearRegressionClass()
 
-    # if path_testing: # If another dataset was given to test the model on
-    #     classifier.fit(preprocessing.vectorize(df, all_cols)) 
-    #     df_testing = spark.read.csv(path_testing, header=True)
-    #     df_testing = df_testing.limit(100)
-    #     df_testing = preprocessing.prepare_data(df_testing)
-    #     classifier.predict(preprocessing.vectorize(df, all_cols))
-    # else:
-    #     # Train/test split
-    #     train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
-    #     classifier.fit(train_df)
-    #     classifier.predict(test_df)
+    if path_testing: # If another dataset was given to test the model on
+        classifier.fit(preprocessing.vectorize(df, all_cols)) 
+        df_testing = spark.read.csv(path_testing, header=True)
+        df_testing = preprocessing.prepare_data(df_testing)
+        classifier.predict(preprocessing.vectorize(df_testing, all_cols))
+    else:
+        # Train/test split
+        train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
+        classifier.fit(train_df)
+        classifier.predict(test_df)

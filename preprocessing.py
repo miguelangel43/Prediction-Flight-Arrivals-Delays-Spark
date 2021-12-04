@@ -44,6 +44,8 @@ def encode_cat_vars(df, cat_column):
     model = encoder.fit(indexed)
     encoded = model.transform(indexed)
     encoded = encoded.drop(*(cat_column, cat_column+'_index'))
+    encoded = encoded.withColumnRenamed(cat_column+'_vector', cat_column)
+
     return encoded
 
 
@@ -77,9 +79,9 @@ def prepare_data(df):
     # Cast columns datatypes to adequate one
     # Cast to int these numerical columns
     df = df.withColumn("Year",col("Year").cast("int"))
-    df = df.withColumn("Month",col("Month").cast("int"))
+    #df = df.withColumn("Month",col("Month").cast("int"))
     df = df.withColumn("DayofMonth",col("DayofMonth").cast("int"))
-    df = df.withColumn("DayOfWeek",col("DayOfWeek").cast("int"))
+    #df = df.withColumn("DayOfWeek",col("DayOfWeek").cast("int"))
     df = df.withColumn("DepTime",col("DepTime").cast("int"))
     df = df.withColumn("CRSDepTime",col("CRSDepTime").cast("int"))
     df = df.withColumn("CRSArrTime",col("CRSArrTime").cast("int"))
@@ -103,7 +105,7 @@ def prepare_data(df):
     df = df.na.drop("any")
 
     # Apply StringIndexer to the categorical columns
-    cat_columns = ["Origin", "Dest"] # "UniqueCarrier", "CancellationCode", "TailNum"
+    cat_columns = ["Origin", "Dest", "DayOfWeek", "Month"] # "UniqueCarrier", "CancellationCode", "TailNum"
     for column in cat_columns:
         df = encode_cat_vars(df, column)
 
