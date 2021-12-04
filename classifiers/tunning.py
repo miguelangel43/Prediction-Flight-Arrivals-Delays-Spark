@@ -20,9 +20,9 @@ class Tunning:
 		lr = LinearRegression(featuresCol = 'features', labelCol='label')
 
 
-		print("#########Linear regression default parameters#########")
-		print(lr.params)
-		print("#########END Linear regression parameters#########")
+		#print("#########Linear regression default parameters#########")
+		#print(lr.params)
+		#print("#########END Linear regression parameters#########")
 
 
 		paramGrid = ParamGridBuilder() \
@@ -39,10 +39,16 @@ class Tunning:
 		cvModel = crossval.fit(self.df)
 		bestModel = cvModel.bestModel
 
-		print("###############Parameters################")
-		hyperparams = cvModel.getEstimatorParamMaps()[np.argmax(cvModel.avgMetrics)]
-		print(hyperparams)
-		print("###############EndParameters#############")
+		print("###############Parameters Linear Regression ################")
+		print("-- Tried:")
+		print("----- regParam:",[0.01, 0.1,1,10,100])
+		print("----- elasticNetParam:",[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1])
+		print("----- maxIter:",[10,100,500])
+
+
+
+		print("Best Parameters")
+		print(bestModel._java_obj.extractParamMap())
 
 		# print(cvModel.explainParams())
 
@@ -67,9 +73,9 @@ class Tunning:
 		#lr = LinearRegression(featuresCol = 'features', labelCol='label')
 		dt = DecisionTreeRegressor(featuresCol='features', labelCol='label')
 
-		print("#########decision tree default parameters#########")
-		print(dt.params)
-		print("#########END decision tree parameters#########")
+		#print("#########decision tree default parameters#########")
+		#print(dt.params)
+		#print("#########END decision tree parameters#########")
 
 
 		paramGrid = ParamGridBuilder() \
@@ -85,30 +91,26 @@ class Tunning:
 		cvModel = crossval.fit(self.df)
 		bestModel = cvModel.bestModel
 
-		print("###############Parameters################")
-		hyperparams = cvModel.getEstimatorParamMaps()[np.argmax(cvModel.avgMetrics)]
-		print(hyperparams)
-		print("###############EndParameters#############")
-
-		print("####### Check best parameters #########")
-		print(" minInstancesPerNode",bestModel._java_obj.getMinInstancesPerNode())
-		print(" max depth",bestModel._java_obj.getMaxDepth())
-
-		print("####### END Check best parameters #########")
-
-		# print(cvModel.explainParams())
+		print("###############Parameters Decision Tree ################")
+		print("-- Tried:")
+		print("----- minInstancesPerNode:",[10,50,100,500])
+		print("----- maxDepth:",[5,10,15,20,25,30])
 
 		
-		print("Summarize the model over the training set and print out some metrics")
-		print(bestModel)
-		print("End summarize")
+	
+		#print("Summarize the model over the training set and print out some metrics")
+		#print(bestModel)
+		#print("End summarize")
+
+		print("Best Parameters for decision tree")
+		print(bestModel._java_obj.extractParamMap())
 
 	def run_rf(self):
 		rf = RandomForestRegressor(featuresCol='features', labelCol='label')
 
-		print("#########random forest  default parameters#########")
-		print(rf.params)
-		print("#########END random forest parameters#########")
+		#print("#########random forest  default parameters#########")
+		#print(rf.params)
+		#print("#########END random forest parameters#########")
 
 
 		paramGrid = ParamGridBuilder() \
@@ -124,31 +126,20 @@ class Tunning:
 		cvModel = crossval.fit(self.df)
 		bestModel = cvModel.bestModel
 
-		print("###############Parameters################")
-		print("###############Parameters nuevo################")
-		print(cvModel.getEstimatorParamMaps())
-		print("###############end Parameters nuevo################")
-		hyperparams = cvModel.getEstimatorParamMaps()[np.argmax(cvModel.avgMetrics)]
-		print(hyperparams)
-		print("###############EndParameters#############")
+		print("###############Parameters Random Forest ################")
+		print("-- Tried:")
+		print("----- numTres:",[3,5,10])
+		print("----- maxDepth:",[5,10,15,20,25,30])
 
-		print("####### Check best parameters #########")
-		print(" num of trees",bestModel._java_obj.getNumTrees())
-		print(" max depth",bestModel._java_obj.getMaxDepth())
-
-		print("####### END Check best parameters #########")
-
-		# print(cvModel.explainParams())
 
 		
-		print("Summarize the model over the training set and print out some metrics")
-		print(bestModel)
-		print("End summarize")
+		#print("Summarize the model over the training set and print out some metrics")
+		#print(bestModel)
+		#print("End summarize")
 
-		print("nuevo best model mapping")
+		print("Best Parameters for random forest")
 		print(bestModel._java_obj.extractParamMap())
-		print("end best model mapping")
-
+		
 
 
 

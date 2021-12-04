@@ -82,8 +82,10 @@ if __name__ == "__main__":
     train_df, test_df = preprocessing.train_test_split(df, sel_col=sel_col)
 
     # Tuning
-    tuning = Tunning(train_df)
-    tuning.run()
+    #tuning = Tunning(train_df)
+    #tuning.run_lr()
+    #tuning.run_dt()
+    #tuning.run_rf()
 
     # Classification
     # classifier = LinearRegressionClass()
