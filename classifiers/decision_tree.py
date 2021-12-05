@@ -16,9 +16,11 @@ class DecisionTreeClass:
 
     def predict(self, test_df):
         # Predict the test_df and print stats
-        dt_predictions = self.model.transform(test_df)
-        dt_predictions.select("prediction","label","features")
-        dt_evaluator = RegressionEvaluator(predictionCol="prediction", \
-                        labelCol="label",metricName="r2")
-
-        print("R Squared (R2) on test data = %g" % dt_evaluator.evaluate(dt_predictions))
+        predictions = self.model.transform(test_df)
+        metrics = ['rmse', 'mse', 'r2', 'mae', 'var']
+        metrics_names = ['Root Mean Squared Error', 'Mean Squared Error', 'R Squared (R2)',
+            'mean absolute error', 'explained variance']
+        evaluator = RegressionEvaluator(predictionCol="prediction", \
+                        labelCol="label")
+        for i in range(len(metrics)):            
+            print(metrics_names[i], "on test data =", evaluator.evaluate(predictions, {evaluator.metricName: metrics[i]}))

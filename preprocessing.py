@@ -101,40 +101,27 @@ def prepare_data(df):
     forbidden_vars = ('ArrTime', 'ActualElapsedTime', 'AirTime', 'TaxiIn', 'Diverted', 'CarrierDelay',
      'WeatherDelay', 'NASDelay', 'SecurityDelay', 'LateAircraftDelay')
     df = df.drop(*forbidden_vars)
-    # print('Original dataframe schema')
-    # df.printSchema()
-
-    # Cast columns datatypes to adequate one
-    # Cast to int these numerical columns
-    df = df.withColumn("Year",col("Year").cast("int"))
-    #df = df.withColumn("Month",col("Month").cast("int"))
-    df = df.withColumn("DayofMonth",col("DayofMonth").cast("int"))
-    #df = df.withColumn("DayOfWeek",col("DayOfWeek").cast("int"))
-    df = df.withColumn("DepTime",col("DepTime").cast("int"))
-    df = df.withColumn("CRSDepTime",col("CRSDepTime").cast("int"))
-    df = df.withColumn("CRSArrTime",col("CRSArrTime").cast("int"))
-    df = df.withColumn("FlightNum",col("FlightNum").cast("int")) # Irrelevant variable?
-    df = df.withColumn("CRSElapsedTime",col("CRSElapsedTime").cast("int"))
-    df = df.withColumn("ArrDelay",col("ArrDelay").cast("int"))
-    df = df.withColumn("DepDelay",col("DepDelay").cast("int"))
-    df = df.withColumn("Distance",col("Distance").cast("int"))
-    df = df.withColumn("TaxiOut",col("TaxiOut").cast("int"))
-    df = df.withColumn("Cancelled",col("Cancelled").cast("int")) # Irrelevant variable
 
     # Rename explanatory variable to 'label'
     df = df.withColumnRenamed('ArrDelay', 'label')
 
     # Drop cancelled flights
     df = df.where("Cancelled == 0")
-    df = df.drop('Cancelled')
-    df = df.drop('CancellationCode')
-    df = df.drop('UniqueCarrier')
+    # Drop some columns
+    drop_cols = ('Cancelled', 'CancellationCode', 'UniqueCarrier', 'TailNum', 'FlightNum')
+    df = df.drop(*drop_cols)
     # Drop null values
     df = df.na.drop("any")
 
-    # Apply StringIndexer to the categorical columns
+    quant_vars = ['Year', 'DayofMonth', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut',
+        'DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'label']
+    # Cast to int these quantitative columns
+    for var in quant_vars:
+        df = df.withColumn(var, col(var).cast("int"))
+
+    # Apply StringIndexer and vectorize the categorical columns
     cat_columns = ["Origin", "Dest", "DayOfWeek", "Month"] # "UniqueCarrier", "CancellationCode", "TailNum"
     for column in cat_columns:
         df = encode_cat_vars(df, column)
 
-    return df
+    return df#.drop(*set(cat_columns))

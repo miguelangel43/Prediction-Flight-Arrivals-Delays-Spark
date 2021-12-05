@@ -33,8 +33,6 @@ def factory_model(model_to_use):
  
 if __name__ == "__main__":
 
-    
- 
     # Create Spark context with Spark configuration
     spark = SparkSession.builder.appName("SimpleApp").getOrCreate()
     sc = spark.sparkContext
@@ -57,7 +55,9 @@ if __name__ == "__main__":
     preprocessing.check_data(df)
 
     # Get only a sample of the rows for faster computation
-    df = df.sample(0.00001)
+    #df = df.sample(0.0001)
+    df = df.limit(1000)
+    print(df.count())
 
     # Drop columns, cast to adequate datatypes, drop null values and encode categorical variables
     print('Preparing the data...')
@@ -73,22 +73,15 @@ if __name__ == "__main__":
     cat_cols = ["Origin", "Dest", "DayOfWeek", "Month"]
 
     # Print some statistics    
-    data_analysis.print_correlations(df, [col for col in all_cols if col not in cat_cols])
-    data_analysis.print_stats(df, [col for col in all_cols if col not in cat_cols])
+    # data_analysis.print_correlations(df, [col for col in all_cols if col not in cat_cols])
+    # data_analysis.print_stats(df, [col for col in all_cols if col not in cat_cols])
 
-
-    # Feature subset selection
-    fss_data = preprocessing.select_variables(df, all_cols)
-    view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
-    view.show()
-
-    
-
+    # # Feature subset selection
+    # fss_data = preprocessing.select_variables(df, all_cols)
+    # view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
+    # view.show()
 
     # Classification
-
-    
-
     if path_testing: # If another dataset was given to test the model on
 
         # Tuning
@@ -99,7 +92,7 @@ if __name__ == "__main__":
         models_to_use = [lr,dt,rf]
 
         df_testing = spark.read.csv(path_testing, header=True)
-        df_testing = df_testing.limit(1000)
+        df_testing = df_testing.sample(0.0001)
 
         df_testing = preprocessing.prepare_data(df_testing)
 
@@ -111,16 +104,22 @@ if __name__ == "__main__":
         
     else:
         # Train/test split
-        train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
+        print('Splitting dataset into train and test...')
+        train_df, test_df = preprocessing.train_test_split(df, sel_col=df.columns)
 
         # Tuning
         tuning = Tunning(train_df)
+        print('Tunning a Linear Regression model...')
         lr = tuning.run_lr()
+        print('Tunning a Decision Tree model...')
         dt = tuning.run_dt()
+        print('Tunning a Random Forest model...')
         rf = tuning.run_rf()
         models_to_use = [lr,dt,rf]
 
+        model_names = ['Linear Regression', 'Decision Tree', 'Random Forest']
         for i in range(0,3):
             classifier = factory_model(i)
             classifier.setModel(models_to_use[i])
+            print('\nTesting', model_names[i], '\n')
             classifier.predict(test_df)

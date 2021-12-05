@@ -30,13 +30,14 @@ class LinearRegressionClass:
         
     def predict(self, test_df):
         # Predict the test_df and print stats
-        lr_predictions = self.model.transform(test_df)
-        lr_predictions.select("prediction","label","features")
-        lr_evaluator = RegressionEvaluator(predictionCol="prediction", \
-                        labelCol="label",metricName="r2")
+        predictions = self.model.transform(test_df)
+        #predictions.select("prediction","label","features")
+        
+        metrics = ['rmse', 'mse', 'r2', 'mae', 'var']
+        metrics_names = ['Root Mean Squared Error', 'Mean Squared Error', 'R Squared (R2)',
+            'mean absolute error', 'explained variance']
 
-        print("R Squared (R2) on test data = %g" % lr_evaluator.evaluate(lr_predictions))
-        test_result = self.model.evaluate(test_df)
-        print("Root Mean Squared Error (RMSE) on test data = %g" % test_result.rootMeanSquaredError)
-
-
+        evaluator = RegressionEvaluator(predictionCol="prediction", \
+                        labelCol="label")
+        for i in range(len(metrics)):            
+            print(metrics_names[i], "on test data =", evaluator.evaluate(predictions, {evaluator.metricName: metrics[i]}))
