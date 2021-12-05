@@ -6,9 +6,9 @@ from pyspark.ml.feature import UnivariateFeatureSelector
 from pyspark.sql.functions import col
 
 def vectorize(df, predictor_vars):
-    #pred_vars = [e for e in predictor_vars if e != 'label']
+    pred_vars = [e for e in predictor_vars if e != 'label']
     df = df.select(predictor_vars)
-    vectorAssembler = VectorAssembler(inputCols = predictor_vars, outputCol = 'features')
+    vectorAssembler = VectorAssembler(inputCols = pred_vars, outputCol = 'features', handleInvalid = "skip")
     vdf_sel = vectorAssembler.transform(df)
     vdf_sel = vdf_sel.select(['features', 'label'])
     return vdf_sel
@@ -19,7 +19,7 @@ def train_test_split(df, sel_col=None, perc_train=0.8, perc_test=0.2):
     if sel_col:
         variables = sel_col
     df = df.select(variables)
-    vectorAssembler = VectorAssembler(inputCols = variables, outputCol = 'features')
+    vectorAssembler = VectorAssembler(inputCols = variables, outputCol = 'features', handleInvalid = "skip")
     vdf_sel = vectorAssembler.transform(df)
     vdf_sel = vdf_sel.select(['features', 'label'])
     train_df, test_df = vdf_sel.randomSplit([perc_train, perc_test])
@@ -121,7 +121,7 @@ def prepare_data(df):
 
     # Apply StringIndexer and vectorize the categorical columns
     cat_columns = ["Origin", "Dest", "DayOfWeek", "Month"] # "UniqueCarrier", "CancellationCode", "TailNum"
-    for column in cat_columns:
-        df = encode_cat_vars(df, column)
+    # for column in cat_columns:
+    #     df = encode_cat_vars(df, column)
 
-    return df#.drop(*set(cat_columns))
+    return df.drop(*set(cat_columns))

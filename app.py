@@ -41,6 +41,7 @@ if __name__ == "__main__":
     #Getting inputs from console, 1 is path of dataset, 2 (Optional) path to test dataset
     path = sys.argv[1]
     path_testing = False
+    print('Reading the data...')
     if len(sys.argv) == 3:
         path_testing = sys.argv[2]
 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
 
     # Get only a sample of the rows for faster computation
     #df = df.sample(0.0001)
-    df = df.limit(1000)
+    #df = df.limit(1000)
     print(df.count())
 
     # Drop columns, cast to adequate datatypes, drop null values and encode categorical variables
@@ -67,39 +68,47 @@ if __name__ == "__main__":
     df.printSchema()
     
     # All variables that will be considered for the prediction
-    all_cols = ['Year', 'Month', 'DayofMonth', 'DayOfWeek', 'CRSDepTime', 'CRSElapsedTime', 'TaxiOut', 'Origin', 'Dest',
-        'DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'label']
+    quant_cols = ['Year', 'DayofMonth', 'DepTime', 'CRSDepTime', 'CRSArrTime', 'CRSElapsedTime', 'label',
+         'DepDelay', 'Distance', 'TaxiOut']
     # Categorical variables
     cat_cols = ["Origin", "Dest", "DayOfWeek", "Month"]
 
     # Print some statistics    
-    # data_analysis.print_correlations(df, [col for col in all_cols if col not in cat_cols])
-    # data_analysis.print_stats(df, [col for col in all_cols if col not in cat_cols])
+    data_analysis.print_stats(df, quant_cols)
+    #data_analysis.print_correlations(df, quant_cols)
 
-    # # Feature subset selection
-    # fss_data = preprocessing.select_variables(df, all_cols)
-    # view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
-    # view.show()
+    # Feature subset selection
+    fss_data = preprocessing.select_variables(df, all_cols)
+    view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
+    view.show(5)
+
+    # We continue only with the variables that the FSS selected
+    fss_cols = ['DepTime', 'DepDelay', 'CRSArrTime', 'CRSDepTime']
+    df = df.select(fss_cols)
+    print('Dataframe schema after FSS')
+    df.printSchema
 
     # Classification
     if path_testing: # If another dataset was given to test the model on
 
         # Tuning
-        tuning = Tunning(preprocessing.vectorize(df, all_cols))
+        tuning = Tunning(preprocessing.vectorize(df, df.columns))
         lr = tuning.run_lr()
         dt = tuning.run_dt()
         rf = tuning.run_rf()
         models_to_use = [lr,dt,rf]
 
         df_testing = spark.read.csv(path_testing, header=True)
-        df_testing = df_testing.sample(0.0001)
-
         df_testing = preprocessing.prepare_data(df_testing)
+        df_testing = df_testing.select(fss_cols)
+        vdf_testing = preprocessing.vectorize(df_testing, df_testing.columns)
 
-        vdf_testing = preprocessing.vectorize(df_testing, all_cols)
+        print('Testing the tunned models...\n')
+        model_names = ['Linear Regression', 'Decision Tree', 'Random Forest']
         for i in range(0,3):
             classifier = factory_model(i)
             classifier.setModel(models_to_use[i])
+            print('\n', model_names[i], '\n')
             classifier.predict(vdf_testing)
         
     else:
@@ -117,9 +126,10 @@ if __name__ == "__main__":
         rf = tuning.run_rf()
         models_to_use = [lr,dt,rf]
 
+        print('Testing the tunned models...\n')
         model_names = ['Linear Regression', 'Decision Tree', 'Random Forest']
         for i in range(0,3):
             classifier = factory_model(i)
             classifier.setModel(models_to_use[i])
-            print('\nTesting', model_names[i], '\n')
+            print('\n', model_names[i], '\n')
             classifier.predict(test_df)
