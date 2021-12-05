@@ -15,10 +15,11 @@ def vectorize(df, predictor_vars):
 
 def train_test_split(df, sel_col=None, perc_train=0.8, perc_test=0.2):
     # Set the variables that will be used
-    variables = ['DepTime', 'DepDelay', 'Distance', 'CRSArrTime', 'label']
+    variables = ['DepTime', 'DepDelay', 'CRSArrTime', 'CRSDepTime']
+    all_cols = ['DepTime', 'DepDelay', 'CRSArrTime', 'CRSDepTime', 'label']
     if sel_col:
         variables = sel_col
-    df = df.select(variables)
+    df = df.select(all_cols)
     vectorAssembler = VectorAssembler(inputCols = variables, outputCol = 'features', handleInvalid = "skip")
     vdf_sel = vectorAssembler.transform(df)
     vdf_sel = vdf_sel.select(['features', 'label'])
