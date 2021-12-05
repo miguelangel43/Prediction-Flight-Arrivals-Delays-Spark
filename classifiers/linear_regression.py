@@ -6,6 +6,9 @@ class LinearRegressionClass:
     def __init__(self):
         self.model = None
 
+    def setModel(self,model):
+        self.model = model
+
     def fit(self, train_df):
         lr = LinearRegression(featuresCol = 'features', labelCol='label', maxIter=10, regParam=0.3, elasticNetParam=0.8)
         lr_model = lr.fit(train_df)

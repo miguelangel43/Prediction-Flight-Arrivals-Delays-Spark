@@ -22,8 +22,18 @@ import preprocessing
 import data_analysis
 
 from pyspark.ml.stat import Correlation
+
+def factory_model(model_to_use):
+        if model_to_use == 0:
+            return LinearRegressionClass()
+        if model_to_use == 1:
+            return DecisionTreeClass()
+        if model_to_use == 2:
+            return RandomForestClass()
  
 if __name__ == "__main__":
+
+    
  
     # Create Spark context with Spark configuration
     spark = SparkSession.builder.appName("SimpleApp").getOrCreate()
@@ -42,7 +52,8 @@ if __name__ == "__main__":
     except:
         print("The specified path is not pointing a readable file")
         exit(1)
-        
+
+    # Check    
     preprocessing.check_data(df)
 
     # Get only a sample of the rows for faster computation
@@ -71,22 +82,45 @@ if __name__ == "__main__":
     view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
     view.show()
 
-    # Tuning
-    tuning = Tunning(preprocessing.vectorize(df, all_cols))
-    lr = tuning.run_lr()
-    dt = tuning.run_dt()
-    rf = tuning.run_rf()
+    
+
 
     # Classification
-    classifier = LinearRegressionClass()
+
+    
 
     if path_testing: # If another dataset was given to test the model on
-        classifier.fit(preprocessing.vectorize(df, all_cols)) 
+
+        # Tuning
+        tuning = Tunning(preprocessing.vectorize(df, all_cols))
+        lr = tuning.run_lr()
+        dt = tuning.run_dt()
+        rf = tuning.run_rf()
+        models_to_use = [lr,dt,rf]
+
         df_testing = spark.read.csv(path_testing, header=True)
+        df_testing = df_testing.limit(1000)
+
         df_testing = preprocessing.prepare_data(df_testing)
-        classifier.predict(preprocessing.vectorize(df_testing, all_cols))
+
+        vdf_testing = preprocessing.vectorize(df_testing, all_cols)
+        for i in range(0,3):
+            classifier = factory_model(i)
+            classifier.setModel(models_to_use[i])
+            classifier.predict(vdf_testing)
+        
     else:
         # Train/test split
         train_df, test_df = preprocessing.train_test_split(df, sel_col=all_cols)
-        classifier.fit(train_df)
-        classifier.predict(test_df)
+
+        # Tuning
+        tuning = Tunning(train_df)
+        lr = tuning.run_lr()
+        dt = tuning.run_dt()
+        rf = tuning.run_rf()
+        models_to_use = [lr,dt,rf]
+
+        for i in range(0,3):
+            classifier = factory_model(i)
+            classifier.setModel(models_to_use[i])
+            classifier.predict(test_df)

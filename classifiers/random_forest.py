@@ -6,6 +6,9 @@ class RandomForestClass:
     def __init__(self):
         self.model = None
 
+    def setModel(self,model):
+        self.model = model
+
     def fit(self, train_df):
         rf = RandomForestRegressor(featuresCol='features', labelCol='label')
         rf_model = rf.fit(train_df)

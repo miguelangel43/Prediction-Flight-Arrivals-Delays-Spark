@@ -6,6 +6,9 @@ class DecisionTreeClass:
     def __init__(self):
         self.model = None
 
+    def setModel(self,model):
+        self.model = model
+
     def fit(self, train_df):
         dt = DecisionTreeRegressor(featuresCol='features', labelCol='label')
         dt_model = dt.fit(train_df)
