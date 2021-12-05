@@ -78,15 +78,15 @@ if __name__ == "__main__":
     #data_analysis.print_correlations(df, quant_cols)
 
     # Feature subset selection
-    fss_data = preprocessing.select_variables(df, all_cols)
-    view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
-    view.show(5)
+    # fss_data = preprocessing.select_variables(df, quant_cols+cat_cols)
+    # view = (fss_data.withColumn("selectedFeatures", vector_to_array("selectedFeatures"))).select([col("selectedFeatures")[i] for i in range(4)])
+    # view.show(5)
 
     # We continue only with the variables that the FSS selected
-    fss_cols = ['DepTime', 'DepDelay', 'CRSArrTime', 'CRSDepTime']
+    fss_cols = ['DepTime', 'DepDelay', 'CRSArrTime', 'CRSDepTime', 'label']
     df = df.select(fss_cols)
-    print('Dataframe schema after FSS')
-    df.printSchema
+    print('\nDataframe schema after FSS')
+    df.printSchema()
 
     # Classification
     if path_testing: # If another dataset was given to test the model on

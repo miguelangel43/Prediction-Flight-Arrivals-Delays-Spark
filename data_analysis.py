@@ -25,10 +25,9 @@ def print_stats(df,rows):
     :params df
     :params rows list of strings of var names
     """
-    df = df.na.drop("any")
     vdf_sel = preprocessing.vectorize(df, rows)
     summarizer = Summarizer.metrics("mean", "count", "max", "min","std", "sum", "variance")
-    means = vdf_sel.select(summarizer.summary(vdf_sel.features)).show()
+    means = vdf_sel.select(summarizer.summary(vdf_sel.features))
     means_list = list(means.toPandas().iloc[0,0][0])
     counts_list = means.toPandas().iloc[0,0][1]
     max_list = list(means.toPandas().iloc[0,0][2])
