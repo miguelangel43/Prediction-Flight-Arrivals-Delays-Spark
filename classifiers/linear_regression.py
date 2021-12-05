@@ -9,18 +9,19 @@ class LinearRegressionClass:
     def fit(self, train_df):
         lr = LinearRegression(featuresCol = 'features', labelCol='label', maxIter=10, regParam=0.3, elasticNetParam=0.8)
         lr_model = lr.fit(train_df)
-        trainingSummary = lr_model.summary
 
-        # # Residuals, number of iterations and other statistics
-        # print("numIterations: %d" % trainingSummary.totalIterations)
-        # print("objectiveHistory: %s" % str(trainingSummary.objectiveHistory))
-        # trainingSummary.residuals.show()
-        # print("Coefficients: " + str(lr_model.coefficients))
-        # print("Intercept: " + str(lr_model.intercept))
-
-        # # Print some statistics
-        # print("RMSE: %f" % trainingSummary.rootMeanSquaredError)
-        # print("r2: %f" % trainingSummary.r2)
+        summary = lr_model.summary
+        print("Coefficient Standard Errors: " + str(summary.coefficientStandardErrors))
+        print("T Values: " + str(summary.tValues))
+        print("P Values: " + str(summary.pValues))
+        print("Dispersion: " + str(summary.dispersion))
+        print("Null Deviance: " + str(summary.nullDeviance))
+        print("Residual Degree Of Freedom Null: " + str(summary.residualDegreeOfFreedomNull))
+        print("Deviance: " + str(summary.deviance))
+        print("Residual Degree Of Freedom: " + str(summary.residualDegreeOfFreedom))
+        print("AIC: " + str(summary.aic))
+        print("Deviance Residuals: ")
+        summary.residuals().show()
 
         self.model = lr_model
         
@@ -34,3 +35,5 @@ class LinearRegressionClass:
         print("R Squared (R2) on test data = %g" % lr_evaluator.evaluate(lr_predictions))
         test_result = self.model.evaluate(test_df)
         print("Root Mean Squared Error (RMSE) on test data = %g" % test_result.rootMeanSquaredError)
+
+
