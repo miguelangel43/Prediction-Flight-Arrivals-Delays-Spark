@@ -1,4 +1,4 @@
-# Prediction of Flight Arrival Delays
+# Prediction of Flight Arrival Delays with Spark
 
 Application that trains a classifier and predicts flight arrival delays based on past information. Uses the libraries pyspark.ml and pyspark.sql, performs feature engineering, cross-validation and tests various ML algorithms.
 
@@ -47,3 +47,33 @@ of samples that has to have at least a node of the tree. The values explored are
   - Number of Trees (numTrees): The amount of trees to be created. The values explored are [3,5,10].
   - Maximum depth of tree (maxDepth): Maximum amount of levels for each tree to be created. The max depth allowed by MLlib is 30. The values explored are [5,10,15,20,25,30].
 
+The hyperparameters chosen for each of the tested models were the following:
+
+| **Model**         | **Parameters Chosen**                             |
+|-------------------|---------------------------------------------------|
+| Linear Regression | regParam:0.1; elasticNetParam:1; maxIter: 100 |
+| Decision Tree     | minInstancesPerNode:10; maxDepth:5            |
+| Random Forest     | numTrees:10; maxDepth:15                       |
+
+The optimal parameters obtained for Linear Regression indicate that the regularization used for the optimization is a L1 (Lasso Regularization) since the elasticNetParam is 1, this type of regularization induces that most of the regression coefficients are low except for one of them (due to the shape area allowed by the coefficients[1]), this is exactly what is happening by looking at the values obtained on the coefficients. On the other hand the regularization parameter is almost 0, which means that there is almost no penalization for complex models (big values of the regression coefficients) and this means that even without penalization of this complexity, the model learned is simple indicating that there is a strong linear dependency with the variable that has a non zero coefficient.
+Regarding Decision Tree regressor it’s interesting to note that there is low depth on the tree, meaning that the regressor tree does not require to get into detailed levels to preserve the minimization of the RMSE. On the other hand the random forest regressor is optimized when using 10 trees allowing a depth fo 15, which would mean that gets into detailed levels of division of the samples
+In order to decide which model to use , the three models have been applied over the test set and in base of a set of metrics the one that performs the best has been chosen as the candidate model, the results are explained in the following section.
+
+## 4. Results and Discussion
+
+In classification, the superiority of a model over the rest can be easily illustrated using metrics like accuracy. This task is more complicated in regression, where the predicted variable is continuous. We mainly used three metrics to determine which was the best model. Those were R Squared, which measures how much variability in the dependent variable can be explained by the model, Mean Square Error (MSE)/Root Mean Square Error (RMSE), which are absolute measures of the fit of the model, and Mean Absolute Error (MAE), which takes the sum of the absolute value of error. In our case, on the dataset we run the models on (800 random samples of the 2007 dataset), linear regression was the best model in all metrics. We therefore conclude that it is the most adequate for prediction. Here are the metrics of the linear regression model:
+
+| Evaluation Metric      | Result |
+|-----------|--------------------|
+| MSE       | 204.40964663956572 |
+| R-Squared | 0.8225314365197474 |
+| MAE       | 10.129652649217405 |
+| RMSE      | 14.297190165888042 |
+
+With the coefficients [0.0, 0.97349004356602, 0.00018743145306736114, -0.00014491746486146065] and intercept -0.6230026865345778.
+
+## 5. Conclusion
+After carrying out this research and based on the results obtained, it is possible to reach the following conclusions:
+
+- Data preprocessing is an essential stage in a data science project. It allows the transformation of the raw data into understandable and usable forms. Raw datasets are usually characterized by incompleteness, inconsistencies, lacking in behavior, and trends while containing errors. In this investigation the preprocessing stage was done in three phases, Business Analysis, Pearson’s Correlation Analysis and Feature Subset Selection, managing to correctly cleaning and transforming the data to be used in the prediction process, the null values were removed and the variables most meaningful were selected .
+- It is necessary to highlight that the regularization parameter obtained for the linear regression model is close to 0, meaning that there is almost no penalization to create complex model, but even on this scenario the model is quite simple, assigning coefficients different than 0 to just one variable, so indeed this variable tends to explain a lot the ArrDelay
